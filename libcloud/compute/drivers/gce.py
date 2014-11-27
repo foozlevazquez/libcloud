@@ -1286,7 +1286,8 @@ class GCENodeDriver(NodeDriver):
                     ex_network='default', ex_tags=None, ex_metadata=None,
                     ex_boot_disk=None, use_existing_disk=True,
                     external_ip='ephemeral', ex_disk_type='pd-standard',
-                    ex_disk_auto_delete=True, ex_service_accounts=None):
+                    ex_disk_auto_delete=True, ex_service_accounts=None,
+                    ex_can_ip_forward=False):
         """
         Create a new node and return a node object for the node.
 
@@ -1351,6 +1352,12 @@ class GCENodeDriver(NodeDriver):
                                        'gcloud compute'.
         :type     ex_service_accounts: ``list``
 
+        :keyword  ex_can_ip_forward: Allow instance to send and receive
+                                     packets with non-matching destination or
+                                     source IPs.
+        :type     ex_can_ip_forward: ``bool``
+
+
         :return:  A Node object for the new node.
         :rtype:   :class:`Node`
         """
@@ -1394,7 +1401,8 @@ class GCENodeDriver(NodeDriver):
                                                    ex_boot_disk, external_ip,
                                                    ex_disk_type,
                                                    ex_disk_auto_delete,
-                                                   ex_service_accounts)
+                                                   ex_service_accounts,
+                                                   ex_can_ip_forward)
         self.connection.async_request(request, method='POST', data=node_data)
 
         return self.ex_get_node(name, location.name)
@@ -3017,7 +3025,8 @@ class GCENodeDriver(NodeDriver):
     def _create_node_req(self, name, size, image, location, network,
                          tags=None, metadata=None, boot_disk=None,
                          external_ip='ephemeral', ex_disk_type='pd-standard',
-                         ex_disk_auto_delete=True, ex_service_accounts=None):
+                         ex_disk_auto_delete=True, ex_service_accounts=None,
+                         ex_can_ip_forward=False):
         """
         Returns a request and body to create a new node.  This is a helper
         method to support both :class:`create_node` and
@@ -3078,12 +3087,19 @@ class GCENodeDriver(NodeDriver):
                                        'gcloud compute'.
         :type     ex_service_accounts: ``list``
 
+        :keyword  ex_can_ip_forward: Allow instance to send and receive
+                                     packets with non-matching destination or
+                                     source IPs.
+        :type     ex_can_ip_forward: ``bool``
+
+
         :return:  A tuple containing a request string and a node_data dict.
         :rtype:   ``tuple`` of ``str`` and ``dict``
         """
         node_data = {}
         node_data['machineType'] = size.extra['selfLink']
         node_data['name'] = name
+        node_data['canIpForward'] = ex_can_ip_forward
         if tags:
             node_data['tags'] = {'items': tags}
         if metadata:
