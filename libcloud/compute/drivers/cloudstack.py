@@ -970,21 +970,27 @@ class CloudStackNodeDriver(CloudStackDriverMixIn, NodeDriver):
         }
         if location is not None:
             args['zoneid'] = location.id
+
         imgs = self._sync_request(command='listTemplates',
                                   params=args,
                                   method='GET')
         images = []
         for img in imgs.get('template', []):
+
+            extra = {'hypervisor': img['hypervisor'],
+                     'format': img['format'],
+                     'os': img['ostypename'],
+                     'displaytext': img['displaytext']}
+
+            size = img.get('size', None)
+            if size is not None:
+                extra.update({'size': img['size']})
+
             images.append(NodeImage(
                 id=img['id'],
                 name=img['name'],
                 driver=self.connection.driver,
-                extra={
-                    'hypervisor': img['hypervisor'],
-                    'format': img['format'],
-                    'size': img['size'],
-                    'os': img['ostypename'],
-                    'displaytext': img['displaytext']}))
+                extra=extra))
         return images
 
     def list_locations(self):
@@ -1127,6 +1133,9 @@ class CloudStackNodeDriver(CloudStackDriverMixIn, NodeDriver):
 
         :type       ex_start_vm: ``bool``
 
+        :keyword    ex_rootdisksize: String with rootdisksize for the template
+        :type       ex_rootdisksize: ``str``
+
         :rtype:     :class:`.CloudStackNode`
         """
 
@@ -1155,6 +1164,7 @@ class CloudStackNodeDriver(CloudStackDriverMixIn, NodeDriver):
         ex_displayname = kwargs.get('ex_displayname', None)
         ex_ip_address = kwargs.get('ex_ip_address', None)
         ex_start_vm = kwargs.get('ex_start_vm', None)
+        ex_rootdisksize = kwargs.get('ex_rootdisksize', None)
 
         if name:
             server_params['name'] = name
@@ -1197,6 +1207,9 @@ class CloudStackNodeDriver(CloudStackDriverMixIn, NodeDriver):
 
         if ex_ip_address:
             server_params['ipaddress'] = ex_ip_address
+
+        if ex_rootdisksize:
+            server_params['rootdisksize'] = ex_rootdisksize
 
         if ex_start_vm is not None:
             server_params['startvm'] = ex_start_vm
