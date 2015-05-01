@@ -27,6 +27,8 @@ __all__ = [
     "get_driver"]
 
 DRIVERS = {
+    Provider.AZURE:
+    ('libcloud.compute.drivers.azure', 'AzureNodeDriver'),
     Provider.DUMMY:
     ('libcloud.compute.drivers.dummy', 'DummyNodeDriver'),
     Provider.EC2_US_EAST:
@@ -153,6 +155,8 @@ DRIVERS = {
     ('libcloud.compute.drivers.profitbricks', 'ProfitBricksNodeDriver'),
     Provider.VULTR:
     ('libcloud.compute.drivers.vultr', 'VultrNodeDriver'),
+    Provider.AURORACOMPUTE:
+    ('libcloud.compute.drivers.auroracompute', 'AuroraComputeNodeDriver'),
 
     # Deprecated
     Provider.CLOUDSIGMA_US:

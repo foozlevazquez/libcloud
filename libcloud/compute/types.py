@@ -78,7 +78,10 @@ class Provider(object):
     :cvar OUTSCALE_INC: Outscale INC driver.
     :cvar PROFIT_BRICKS: ProfitBricks driver.
     :cvar VULTR: vultr driver.
+    :cvar AZURE: Azure driver.
+    :cvar AURORACOMPUTE: Aurora Compute driver.
     """
+    AZURE = 'azure'
     DUMMY = 'dummy'
     EC2 = 'ec2_us_east'
     RACKSPACE = 'rackspace'
@@ -126,6 +129,7 @@ class Provider(object):
     VSPHERE = 'vsphere'
     PROFIT_BRICKS = 'profitbricks'
     VULTR = 'vultr'
+    AURORACOMPUTE = 'aurora_compute'
 
     # OpenStack based providers
     HPCLOUD = 'hpcloud'
@@ -219,6 +223,21 @@ class NodeState(object):
     @classmethod
     def fromstring(cls, value):
         return getattr(cls, value.upper(), None)
+
+
+class StorageVolumeState(object):
+    """
+    Standard states of a StorageVolume
+    """
+    AVAILABLE = 0
+    ERROR = 1
+    INUSE = 2
+    CREATING = 3
+    DELETING = 4
+    DELETED = 5
+    BACKUP = 6
+    ATTACHING = 7
+    UNKNOWN = 8
 
 
 class Architecture(object):
