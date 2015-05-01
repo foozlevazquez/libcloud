@@ -1480,9 +1480,20 @@ class GCENodeDriver(NodeDriver):
         """
         list_snapshots = []
         request = '/global/snapshots'
-        response = self.connection.request(request, method='GET').object
-        list_snapshots = [self._to_snapshot(s) for s in
-                          response.get('items', [])]
+        done = False
+        params = {}
+
+        while not done:
+            response = self.connection.request(
+                request, method='GET', params=params).object
+            list_snapshots.extend([self._to_snapshot(s) for s in
+                                   response.get('items', [])])
+            nextPageToken = response.get('nextPageToken')
+            if nextPageToken:
+                params = {'pageToken': nextPageToken}
+            else:
+                done = True
+
         return list_snapshots
 
     def ex_list_targethttpproxies(self):
@@ -5179,7 +5190,7 @@ n
                          quotas=quotas, deprecated=deprecated,
                          driver=self, extra=extra)
 
-    def _to_snapshot(self, snapshot):
+    def _to_snapshot(self, snapshot, get_licenses=False):
         """
         Return a Snapshot object from the JSON-response dictionary.
 
@@ -5201,7 +5212,7 @@ n
             extra['storageBytes'] = snapshot['storageBytes']
         if 'storageBytesStatus' in snapshot:
             extra['storageBytesStatus'] = snapshot['storageBytesStatus']
-        if 'licenses' in snapshot:
+        if 'licenses' in snapshot and get_licenses:
             lic_objs = self._licenses_from_urls(licenses=snapshot['licenses'])
             extra['licenses'] = lic_objs
 
